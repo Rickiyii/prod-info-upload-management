@@ -1,0 +1,62 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/report_upload?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai
+    username: thisUser
+    password: thisUsersPassword
+    max-active: 20
+    max-idle: 8
+    min-idle: 8
+    initial-size: 10
+  messages:
+    basename: i18n/messages
+
+mybatis:
+  mapper-locations: classpath:/org/flowwork/mapper/*.java
+
+report-patterns:
+  pages:
+    - scope: 报告
+      devices:
+        - itemGroups:
+            - itemNames: 版本, 检测模块, 计算机, 用户, 操作系统, 日期, 时间
+    - scope: 中央处理器(CPU)
+      devices:
+        - itemGroups:
+            - groupName: 中央处理器(CPU)
+              itemNames: 处理器名称, 制程步进, 原始频率, L2缓存, L3缓存
+    - scope: SPD
+      devices:
+        - itemGroups:
+            - groupName: 内存模块
+              itemNames: 模块名称, 序列号, 模块容量, 模块类型, 存取类型, 存取速度, 模块位宽, 模块电压, 错误检测方式, DRAM制造商
+    - scope: 芯片组
+      devices:
+        - itemGroups:
+            - groupName: 北桥属性
+            - groupName: 内存插槽
+        - itemGroups:
+            - groupName: 南桥属性
+    - scope: 操作系统
+      devices:
+        - itemGroups:
+            - groupName: 操作系统
+            - groupName: 授权信息
+            - groupName: 当前状态
+              itemNames: 计算机名称, 用户名称
+    - scope: 图形处理器(GPU)
+      devices:
+        - itemGroups:
+            - groupName: 图形处理器(GPU)
+            - groupName: 内存总线特性
+            - groupName: 架构
+    - scope: 物理驱动器
+    - scope: ATA
+      devices:
+        - itemGroups:
+            - itemNames: 型号 ID, 序列号, 修订, 设备类型, 未格式化容量, World Wide Name, 参数, LBA 扇区, 盘片转速
+    - scope: Windows 网络
+      devices:
+        - itemGroups:
+            - groupName: 网络适配器信息
+              itemNames: 网络适配器, 接口类型, 硬件地址(MAC), 连接名称, 连接速度
