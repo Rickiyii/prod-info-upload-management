@@ -7,7 +7,7 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.flowwork</groupId>
-    <artifactId>prod-mid-management</artifactId>
+    <artifactId>prod-info-upload-management</artifactId>
     <version>1.0-SNAPSHOT</version>
     <dependencies>
         <dependency>

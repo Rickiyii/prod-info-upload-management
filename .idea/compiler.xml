@@ -7,13 +7,13 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="prod-mid-management" />
+        <module name="prod-info-upload-management" />
       </profile>
     </annotationProcessing>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
-      <module name="prod-mid-management" options="-parameters" />
+      <module name="prod-info-upload-management" options="-parameters" />
     </option>
   </component>
 </project>
