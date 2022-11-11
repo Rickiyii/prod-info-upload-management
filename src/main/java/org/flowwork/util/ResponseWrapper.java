@@ -36,10 +36,11 @@ public class ResponseWrapper<T> {
 
   public ResponseWrapper(T data) {
 
-    if (isEmpty(data)) {
-      this.code = HttpStatus.NO_CONTENT.value();
-      this.message = HttpStatus.NO_CONTENT.getReasonPhrase();
-    } else {
+//    if (isEmpty(data)) {
+//      this.code = HttpStatus.NO_CONTENT.value();
+//      this.message = HttpStatus.NO_CONTENT.getReasonPhrase();
+//    } else
+    {
       this.code = HttpStatus.OK.value();
       this.message = HttpStatus.OK.getReasonPhrase();
       this.data = data;

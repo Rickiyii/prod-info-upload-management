@@ -7,7 +7,6 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
 import java.util.Date;
-import java.util.List;
 
 
 @Data
@@ -21,10 +20,10 @@ public class Report {
     private String checkCode;
 
     @TableField("ataSns")
-    private List<String> ataSns;
+    private String ataSns;
 
     @TableField("macs")
-    private List<String> macs;
+    private String macs;
 
     @TableField(value = "createTime")
     private Date createTime;

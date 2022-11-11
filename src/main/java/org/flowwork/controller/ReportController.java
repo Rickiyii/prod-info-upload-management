@@ -2,10 +2,16 @@ package org.flowwork.controller;
 
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.support.ExcelTypeEnum;
+import com.baomidou.mybatisplus.core.metadata.PageList;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.extern.slf4j.Slf4j;
+import org.flowwork.controller.dto.PageRequest;
+import org.flowwork.controller.dto.ReportDto;
 import org.flowwork.exception.MessageKeys;
 import org.flowwork.exception.ServiceWaringException;
+import org.flowwork.model.entity.Report;
 import org.flowwork.model.entity.ReportItem;
+import org.flowwork.service.ReportService;
 import org.flowwork.util.ReportExcelListener;
 import org.flowwork.util.ResponseWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,12 +23,15 @@ import java.io.InputStream;
 import java.nio.charset.Charset;
 
 @RestController
-@RequestMapping(value = "/prod/mid")
+@RequestMapping(value = "/prod/report")
 @Slf4j
-public class ReportUploadController extends BaseController {
+public class ReportController extends BaseController {
 
     @Autowired
     ApplicationContext applicationContext;
+
+    @Autowired
+    ReportService reportService;
 
     @PostMapping("/upload/{snNumber}")
     public ResponseWrapper<Boolean> upload(@PathVariable("snNumber") String snNumber, MultipartFile file) {
@@ -41,5 +50,11 @@ public class ReportUploadController extends BaseController {
             throw new ServiceWaringException(MessageKeys.UPLOAD_FAILED, e.getMessage());
         }
         return new ResponseWrapper<>(true);
+    }
+
+    @PostMapping("/list")
+    public ResponseWrapper<Page<Report>> list(@RequestBody PageRequest<ReportDto> pageRequest) {
+        Page<Report> page = reportService.findByPage(pageRequest);
+        return new ResponseWrapper<>(page);
     }
 }

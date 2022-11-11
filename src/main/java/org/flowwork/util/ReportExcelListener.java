@@ -60,6 +60,6 @@ public class ReportExcelListener implements ReadListener<ReportItem> {
      */
     private synchronized void saveData() {
         log.info("matched size: {}", cachedDataList.size());
-        //reportService.save(snNumber, cachedDataList);
+        reportService.save(snNumber, cachedDataList);
     }
 }

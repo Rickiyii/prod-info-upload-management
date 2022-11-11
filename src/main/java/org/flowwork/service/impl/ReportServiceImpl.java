@@ -1,8 +1,13 @@
 package org.flowwork.service.impl;
 
 import com.alibaba.fastjson.JSON;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.PageList;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.extern.slf4j.Slf4j;
+import org.flowwork.controller.dto.PageRequest;
+import org.flowwork.controller.dto.ReportDto;
 import org.flowwork.mapper.ReportDetailMapper;
 import org.flowwork.mapper.ReportMapper;
 import org.flowwork.model.entity.Report;
@@ -31,15 +36,13 @@ public class ReportServiceImpl implements ReportService {
 
         try {
             // 插入报告数据
-            Report report = extractReportBrief(snNumber, cachedDataList);
+            Report report = extractBriefReport(snNumber, cachedDataList);
             Integer reportId = upsert(report);
 
             ReportDetail reportDetail = new ReportDetail();
             reportDetail.setReportId(reportId);
             reportDetail.setSnNumber(snNumber);
             reportDetail.setDetail(JSON.toJSONString(cachedDataList));
-            QueryWrapper<Report> wrapper=new QueryWrapper<>();
-            wrapper.eq("sn", snNumber);
 
             upsertDetail(reportDetail);
 
@@ -52,17 +55,35 @@ public class ReportServiceImpl implements ReportService {
         }
     }
 
-    private Report extractReportBrief(String snNumber, List<ReportItem> cachedDataList) {
+    private Report extractBriefReport(String snNumber, List<ReportItem> cachedDataList) {
         Report report = new Report();
-        report.setSnNumber(snNumber);
+        StringBuilder ataSns = new StringBuilder();
+        StringBuilder macs = new StringBuilder();
         for (ReportItem item : cachedDataList) {
-
+            if ("ATA".equals(item.getScope()) && "序列号".equals(item.getItemName())) {
+                if (ataSns.length() != 0) {
+                    ataSns.append(",");
+                }
+                ataSns.append(item.getItemValue());
+            }
+            if ("Windows 网络".equals(item.getScope()) && "硬件地址(MAC)".equals(item.getItemName())) {
+                if (!"00-00-00-00-00-00".equals(item.getItemValue())) {
+                    if (macs.length() != 0) {
+                        macs.append(",");
+                    }
+                    macs.append(item.getItemValue());
+                }
+            }
         }
-        return null;
+        report.setCheckCode(UuidUtil.generate16());
+        report.setSnNumber(snNumber);
+        report.setAtaSns(ataSns.toString());
+        report.setMacs(macs.toString());
+        return report;
     }
 
     @Override
-    public Report getBySn(String snNumber) {
+    public Report getReportBySnNumber(String snNumber) {
         QueryWrapper<Report> query = new QueryWrapper<>();
         query.eq("sn", snNumber);
         return reportMapper.selectOne(query);
@@ -75,20 +96,19 @@ public class ReportServiceImpl implements ReportService {
 
     @Override
     public Integer upsert(Report report) {
-        Report exist = getBySn(report.getSnNumber());
+        Report exist = getReportBySnNumber(report.getSnNumber());
         Date now = new Date();
         if (exist == null) {
-            report = new Report();
-            report.setCheckCode(UuidUtil.generate16());
             report.setCreateTime(now);
             report.setUpdateTime(now);
             reportMapper.insert(report);
-            report = getBySn(report.getSnNumber());
+            report = getReportBySnNumber(report.getSnNumber());
         } else {
             exist.setAtaSns(report.getAtaSns());
             exist.setMacs(report.getMacs());
             exist.setUpdateTime(now);
             reportMapper.updateById(report);
+            report = exist;
         }
         return report.getReportId();
     }
@@ -111,5 +131,22 @@ public class ReportServiceImpl implements ReportService {
             reportDetailMapper.updateById(exist);
         }
         log.info("报告：{} 详情已保存 ", reportDetail.getSnNumber());
+    }
+
+    @Override
+    public Page<Report> findByPage(PageRequest<ReportDto> pageRequest) {
+        Page<Report> page = new Page<>();
+        page.setCurrent(pageRequest.getCurrent());
+        page.setSize(pageRequest.getSize());
+        ReportDto queryParam = pageRequest.getQueryParam();
+        LambdaQueryWrapper<Report> query = new LambdaQueryWrapper<>();
+        if (queryParam != null) {
+            query.eq(Report::getReportId, queryParam.getReportId());
+            query.eq(Report::getSnNumber, queryParam.getSnNumber());
+            query.eq(Report::getCheckCode, queryParam.getCheckCode());
+            query.in(Report::getCreateTime, queryParam.getCreateTimeStart(), queryParam.getCreateTimeEnd());
+            query.in(Report::getUpdateTime, queryParam.getUpdateTimeStart(), queryParam.getUpdateTimeEnd());
+        }
+        return reportMapper.selectPage(page, query);
     }
 }

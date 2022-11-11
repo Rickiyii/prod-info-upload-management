@@ -6,8 +6,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
 @MapperScan("org.flowwork.mapper")
-public class ProdMidManagementApplication {
+public class ProdInfoUploadManagementApplication {
     public static void main(String[] args) {
-        SpringApplication.run(ProdMidManagementApplication.class, args);
+        SpringApplication.run(ProdInfoUploadManagementApplication.class, args);
     }
 }
