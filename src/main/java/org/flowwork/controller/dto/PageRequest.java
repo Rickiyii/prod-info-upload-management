@@ -10,7 +10,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class PageRequest<T> {
-    private int current;
+    private int page;
     private int size;
     private T queryParam;
 }

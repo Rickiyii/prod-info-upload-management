@@ -5,6 +5,7 @@ import com.alibaba.excel.support.ExcelTypeEnum;
 import com.baomidou.mybatisplus.core.metadata.PageList;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.extern.slf4j.Slf4j;
+import org.flowwork.controller.dto.PageDto;
 import org.flowwork.controller.dto.PageRequest;
 import org.flowwork.controller.dto.ReportDto;
 import org.flowwork.exception.MessageKeys;
@@ -53,8 +54,8 @@ public class ReportController extends BaseController {
     }
 
     @PostMapping("/list")
-    public ResponseWrapper<Page<Report>> list(@RequestBody PageRequest<ReportDto> pageRequest) {
-        Page<Report> page = reportService.findByPage(pageRequest);
+    public ResponseWrapper<PageDto<Report>> list(@RequestBody PageRequest<ReportDto> pageRequest) {
+        PageDto<Report> page = reportService.findByPage(pageRequest);
         return new ResponseWrapper<>(page);
     }
 }

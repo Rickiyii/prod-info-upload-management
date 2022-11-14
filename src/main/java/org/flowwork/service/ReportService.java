@@ -1,7 +1,6 @@
 package org.flowwork.service;
 
-import com.baomidou.mybatisplus.core.metadata.PageList;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import org.flowwork.controller.dto.PageDto;
 import org.flowwork.controller.dto.PageRequest;
 import org.flowwork.controller.dto.ReportDto;
 import org.flowwork.model.entity.Report;
@@ -18,5 +17,5 @@ public interface ReportService {
 
     Integer upsert(Report report);
 
-    Page<Report> findByPage(PageRequest<ReportDto> pageRequest);
+    PageDto<Report> findByPage(PageRequest<ReportDto> pageRequest);
 }
