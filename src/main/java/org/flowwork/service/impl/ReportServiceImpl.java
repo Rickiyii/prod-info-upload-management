@@ -9,6 +9,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.flowwork.controller.dto.PageDto;
 import org.flowwork.controller.dto.PageRequest;
 import org.flowwork.controller.dto.ReportDto;
+import org.flowwork.exception.MessageKeys;
+import org.flowwork.exception.ServiceWaringException;
 import org.flowwork.mapper.ReportDetailMapper;
 import org.flowwork.mapper.ReportMapper;
 import org.flowwork.model.entity.Report;
@@ -169,5 +171,19 @@ public class ReportServiceImpl implements ReportService {
         pageDto.setTotal(reportPage.getTotal());
         pageDto.setData(reportPage.getRecords());
         return pageDto;
+    }
+
+    @Override
+    public ReportDetail getReportDetail(String snNumber) {
+        if (StringUtils.isEmpty(snNumber)) {
+            throw new ServiceWaringException(MessageKeys.REPORT_SN_EMPTY);
+        }
+        LambdaQueryWrapper<ReportDetail> query = new LambdaQueryWrapper<>();
+        query.eq(ReportDetail::getSnNumber, snNumber);
+        ReportDetail detail = reportDetailMapper.selectOne(query);
+        if (detail == null) {
+            throw new ServiceWaringException(MessageKeys.REPORT_DETAIL_NOT_EXIST);
+        }
+        return detail;
     }
 }

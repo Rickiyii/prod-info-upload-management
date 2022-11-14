@@ -7,10 +7,12 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.extern.slf4j.Slf4j;
 import org.flowwork.controller.dto.PageDto;
 import org.flowwork.controller.dto.PageRequest;
+import org.flowwork.controller.dto.ReportDetailRequest;
 import org.flowwork.controller.dto.ReportDto;
 import org.flowwork.exception.MessageKeys;
 import org.flowwork.exception.ServiceWaringException;
 import org.flowwork.model.entity.Report;
+import org.flowwork.model.entity.ReportDetail;
 import org.flowwork.model.entity.ReportItem;
 import org.flowwork.service.ReportService;
 import org.flowwork.util.ReportExcelListener;
@@ -57,5 +59,11 @@ public class ReportController extends BaseController {
     public ResponseWrapper<PageDto<Report>> list(@RequestBody PageRequest<ReportDto> pageRequest) {
         PageDto<Report> page = reportService.findByPage(pageRequest);
         return new ResponseWrapper<>(page);
+    }
+
+    @PostMapping("/detail")
+    public ResponseWrapper<ReportDetail> getDetail(@RequestBody ReportDetailRequest request) {
+        ReportDetail reportDetail = reportService.getReportDetail(request.getSnNumber());
+        return new ResponseWrapper<>(reportDetail);
     }
 }
