@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.PageList;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.flowwork.controller.dto.PageRequest;
 import org.flowwork.controller.dto.ReportDto;
 import org.flowwork.mapper.ReportDetailMapper;
@@ -135,17 +136,32 @@ public class ReportServiceImpl implements ReportService {
 
     @Override
     public Page<Report> findByPage(PageRequest<ReportDto> pageRequest) {
-        Page<Report> page = new Page<>();
-        page.setCurrent(pageRequest.getCurrent());
-        page.setSize(pageRequest.getSize());
+        Page<Report> page = new Page<>(pageRequest.getCurrent(), pageRequest.getSize());
         ReportDto queryParam = pageRequest.getQueryParam();
         LambdaQueryWrapper<Report> query = new LambdaQueryWrapper<>();
         if (queryParam != null) {
-            query.eq(Report::getReportId, queryParam.getReportId());
-            query.eq(Report::getSnNumber, queryParam.getSnNumber());
-            query.eq(Report::getCheckCode, queryParam.getCheckCode());
-            query.in(Report::getCreateTime, queryParam.getCreateTimeStart(), queryParam.getCreateTimeEnd());
-            query.in(Report::getUpdateTime, queryParam.getUpdateTimeStart(), queryParam.getUpdateTimeEnd());
+            Integer reportId = queryParam.getReportId();
+            String snNumber = queryParam.getSnNumber();
+            String checkCode = queryParam.getCheckCode();
+            Date createTimeStart = queryParam.getCreateTimeStart();
+            Date createTimeEnd = queryParam.getCreateTimeEnd();
+            Date updateTimeStart = queryParam.getUpdateTimeStart();
+            Date updateTimeEnd = queryParam.getUpdateTimeEnd();
+            if (reportId != null) {
+                query.eq(Report::getReportId, reportId);
+            }
+            if (StringUtils.isNotEmpty(snNumber)) {
+                query.eq(Report::getSnNumber, snNumber);
+            }
+            if (StringUtils.isNotEmpty(checkCode)) {
+                query.eq(Report::getCheckCode, checkCode);
+            }
+            if (createTimeStart != null && createTimeEnd != null) {
+                query.in(Report::getCreateTime, createTimeStart, createTimeEnd);
+            }
+            if (updateTimeStart != null && updateTimeEnd != null) {
+                query.in(Report::getUpdateTime, updateTimeStart, updateTimeEnd);
+            }
         }
         return reportMapper.selectPage(page, query);
     }
