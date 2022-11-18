@@ -12,6 +12,7 @@ import org.flowwork.exception.ServiceWaringException;
 import org.flowwork.model.entity.Report;
 import org.flowwork.model.entity.ReportDetail;
 import org.flowwork.model.entity.ReportItem;
+import org.flowwork.model.entity.ReportItemExport;
 import org.flowwork.service.ReportService;
 import org.flowwork.util.ReportExcelListener;
 import org.flowwork.util.ResponseWrapper;
@@ -82,11 +83,11 @@ public class ReportController extends BaseController {
         response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
         response.setCharacterEncoding("utf-8");
         // 这里URLEncoder.encode可以防止中文乱码 当然和easyexcel没有关系
-        String fileName = URLEncoder.encode("测试", "UTF-8").replaceAll("\\+", "%20");
+        String fileName = URLEncoder.encode(snNumber, "UTF-8").replaceAll("\\+", "%20");
         response.setHeader("Content-disposition", "attachment;filename*=utf-8''" + fileName + ".xlsx");
         ReportDetail reportDetail = reportService.getReportDetail(snNumber);
         String detailStr = reportDetail.getDetail();
-        List<ReportItem> reportItems = JSON.parseArray(detailStr, ReportItem.class);
-        EasyExcel.write(response.getOutputStream(), ReportItem.class).sheet("模板").doWrite(reportItems);
+        List<ReportItemExport> reportItems = JSON.parseArray(detailStr, ReportItemExport.class);
+        EasyExcel.write(response.getOutputStream(), ReportItemExport.class).sheet(snNumber).doWrite(reportItems);
     }
 }

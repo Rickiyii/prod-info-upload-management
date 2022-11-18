@@ -60,6 +60,7 @@ public class ReportServiceImpl implements ReportService {
         Report report = new Report();
         StringBuilder ataSns = new StringBuilder();
         StringBuilder macs = new StringBuilder();
+        StringBuilder dns = new StringBuilder();
         for (ReportItem item : cachedDataList) {
             if ("ATA".equals(item.getScope()) && "序列号".equals(item.getItemName())) {
                 if (ataSns.length() != 0) {
@@ -67,12 +68,18 @@ public class ReportServiceImpl implements ReportService {
                 }
                 ataSns.append(item.getItemValue());
             }
-            if ("Windows 网络".equals(item.getScope()) && "硬件地址(MAC)".equals(item.getItemName())) {
-                if (!"00-00-00-00-00-00".equals(item.getItemValue())) {
+            if ("Windows 网络".equals(item.getScope())) {
+                if ("硬件地址(MAC)".equals(item.getItemName()) && !"00-00-00-00-00-00".equals(item.getItemValue())) {
                     if (macs.length() != 0) {
                         macs.append(",");
                     }
                     macs.append(item.getItemValue());
+                }
+                if ("DNS".equals(item.getItemName())) {
+                    if (dns.length() != 0) {
+                        dns.append(",");
+                    }
+                    dns.append(item.getItemValue());
                 }
             }
         }
@@ -80,6 +87,7 @@ public class ReportServiceImpl implements ReportService {
         report.setSnNumber(snNumber);
         report.setAtaSns(ataSns.toString());
         report.setMacs(macs.toString());
+        report.setDns(dns.toString());
         return report;
     }
 

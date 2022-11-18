@@ -25,6 +25,9 @@ public class Report {
     @TableField("macs")
     private String macs;
 
+    @TableField("dns")
+    private String dns;
+
     @TableField(value = "createTime")
     private Date createTime;
     @TableField(value = "updateTime")
