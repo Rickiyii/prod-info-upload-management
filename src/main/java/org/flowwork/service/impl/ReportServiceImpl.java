@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.flowwork.controller.dto.PageDto;
 import org.flowwork.controller.dto.PageRequest;
+import org.flowwork.controller.dto.ReportDetailRequest;
 import org.flowwork.controller.dto.ReportDto;
 import org.flowwork.exception.MessageKeys;
 import org.flowwork.exception.ServiceWaringException;
@@ -21,8 +22,10 @@ import org.flowwork.util.UuidUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -185,5 +188,41 @@ public class ReportServiceImpl implements ReportService {
             throw new ServiceWaringException(MessageKeys.REPORT_DETAIL_NOT_EXIST);
         }
         return detail;
+    }
+
+    @Override
+    public List<ReportItem> getReportDetailList(ReportDetailRequest request) {
+        ReportDetail reportDetail = getReportDetail(request.getSnNumber());
+        String detail = reportDetail.getDetail();
+        List<ReportItem> items = JSON.parseArray(detail, ReportItem.class);
+        if (items == null) {
+            return new ArrayList<>();
+        }
+        String scopeName = request.getScopeName();
+        String deviceName = request.getDeviceName();
+        String groupName = request.getGroupName();
+
+        return items.stream().filter(item -> {
+            boolean scopeCond;
+            boolean deviceCond;
+            boolean groupCond;
+
+            if (StringUtils.isEmpty(scopeName)) {
+                scopeCond = true;
+            } else {
+                scopeCond = item.getScope() != null && item.getScope().contains(scopeName);
+            }
+            if (StringUtils.isEmpty(deviceName)) {
+                deviceCond = true;
+            } else {
+                deviceCond = item.getDeviceName() != null && item.getDeviceName().contains(deviceName);
+            }
+            if (StringUtils.isEmpty(groupName)) {
+                groupCond = true;
+            } else {
+                groupCond = item.getGroupName() != null && item.getGroupName().contains(groupName);
+            }
+            return scopeCond && deviceCond && groupCond;
+        }).collect(Collectors.toList());
     }
 }

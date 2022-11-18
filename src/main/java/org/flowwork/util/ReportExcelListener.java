@@ -45,6 +45,7 @@ public class ReportExcelListener implements ReadListener<ReportItem> {
     @Override
     public void invoke(ReportItem row, AnalysisContext analysisContext) {
         if (reportPattern.match(row)) {
+            row.setId(cachedDataList.size());
             cachedDataList.add(row);
             log.info("matched data: {}", JSON.toJSONString(row));
         }

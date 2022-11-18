@@ -11,4 +11,7 @@ import lombok.Setter;
 @Setter
 public class ReportDetailRequest {
     private String snNumber;
+    private String scopeName;
+    private String deviceName;
+    private String groupName;
 }
