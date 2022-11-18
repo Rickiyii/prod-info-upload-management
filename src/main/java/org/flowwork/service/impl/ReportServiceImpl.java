@@ -6,10 +6,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.flowwork.controller.dto.PageDto;
-import org.flowwork.controller.dto.PageRequest;
-import org.flowwork.controller.dto.ReportDetailRequest;
-import org.flowwork.controller.dto.ReportDto;
+import org.flowwork.controller.dto.*;
 import org.flowwork.exception.MessageKeys;
 import org.flowwork.exception.ServiceWaringException;
 import org.flowwork.mapper.ReportDetailMapper;
@@ -22,9 +19,7 @@ import org.flowwork.util.UuidUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -191,21 +186,63 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    public List<ReportItem> getReportDetailList(ReportDetailRequest request) {
+    public ReportItemInfo getReportDetailList(ReportDetailRequest request) {
         ReportDetail reportDetail = getReportDetail(request.getSnNumber());
         String detail = reportDetail.getDetail();
         List<ReportItem> items = JSON.parseArray(detail, ReportItem.class);
         if (items == null) {
-            return new ArrayList<>();
+            return new ReportItemInfo();
         }
         String scopeName = request.getScopeName();
         String deviceName = request.getDeviceName();
         String groupName = request.getGroupName();
 
-        return items.stream().filter(item -> {
+        Map<String, Integer> scopeMap = new HashMap<>();
+        Map<String, Map<String, Integer>> scopeGroupMap =new HashMap<>();
+
+        ReportItemInfo itemInfo = new ReportItemInfo();
+        List<MenuGroup> menuGroups = new ArrayList<>();
+
+        List<ReportItem> details = items.stream().filter(item -> {
             boolean scopeCond;
             boolean deviceCond;
             boolean groupCond;
+
+            MenuGroup menuGroup = new MenuGroup();
+            Map<String, Integer> groupMap = new HashMap<>();
+
+            String thisScopeName = item.getScope();
+            String thisGroupName = item.getGroupName() == null ? thisScopeName : item.getGroupName();
+            if (!scopeMap.containsKey(thisScopeName)) {
+                int index = menuGroups.size();
+                scopeMap.put(thisScopeName, index);
+                groupMap.put(thisGroupName, 0);
+                scopeGroupMap.put(thisScopeName, groupMap);
+
+                MenuGroupChild child = new MenuGroupChild();
+                child.setKey(thisGroupName);
+                child.setLabel(thisGroupName);
+
+                menuGroup.setKey(thisScopeName + "信息");
+                menuGroup.setLabel(thisScopeName + "信息");
+                menuGroup.setType(thisScopeName + "信息");
+                List<MenuGroupChild> children = new ArrayList<>();
+                children.add(child);
+                menuGroup.setChildren(children);
+                menuGroups.add(menuGroup);
+            } else {
+                int index = scopeMap.get(thisScopeName);
+                List<MenuGroupChild> children = menuGroups.get(index).getChildren();
+                Map<String, Integer> thisGroupMap = scopeGroupMap.get(thisScopeName);
+                if (!thisGroupMap.containsKey(thisGroupName)) {
+                    thisGroupMap.put(thisGroupName, 0);
+
+                    MenuGroupChild child = new MenuGroupChild();
+                    child.setKey(thisGroupName);
+                    child.setLabel(thisGroupName);
+                    children.add(child);
+                }
+            }
 
             if (StringUtils.isEmpty(scopeName)) {
                 scopeCond = true;
@@ -220,9 +257,17 @@ public class ReportServiceImpl implements ReportService {
             if (StringUtils.isEmpty(groupName)) {
                 groupCond = true;
             } else {
-                groupCond = item.getGroupName() != null && item.getGroupName().contains(groupName);
+                if (StringUtils.isEmpty(item.getGroupName())) {
+                    groupCond = item.getScope() != null && item.getScope().contains(groupName);
+                } else {
+                    groupCond = item.getGroupName() != null && item.getGroupName().contains(groupName);
+                }
             }
             return scopeCond && deviceCond && groupCond;
         }).collect(Collectors.toList());
+
+        itemInfo.setMenuGroups(menuGroups);
+        itemInfo.setDetails(details);
+        return itemInfo;
     }
 }

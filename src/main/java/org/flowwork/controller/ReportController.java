@@ -2,13 +2,11 @@ package org.flowwork.controller;
 
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.support.ExcelTypeEnum;
+import com.alibaba.fastjson2.JSON;
 import com.baomidou.mybatisplus.core.metadata.PageList;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.extern.slf4j.Slf4j;
-import org.flowwork.controller.dto.PageDto;
-import org.flowwork.controller.dto.PageRequest;
-import org.flowwork.controller.dto.ReportDetailRequest;
-import org.flowwork.controller.dto.ReportDto;
+import org.flowwork.controller.dto.*;
 import org.flowwork.exception.MessageKeys;
 import org.flowwork.exception.ServiceWaringException;
 import org.flowwork.model.entity.Report;
@@ -22,7 +20,10 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.io.InputStream;
+import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.util.List;
 
@@ -69,9 +70,23 @@ public class ReportController extends BaseController {
     }
 
     @PostMapping("/detail/list/{snNumber}")
-    public ResponseWrapper<List<ReportItem>> getDetailedList(@PathVariable("snNumber") String snNumber, @RequestBody ReportDetailRequest request) {
+    public ResponseWrapper<ReportItemInfo> getDetailedList(@PathVariable("snNumber") String snNumber, @RequestBody ReportDetailRequest request) {
         request.setSnNumber(snNumber);
-        List<ReportItem> detailList = reportService.getReportDetailList(request);
-        return new ResponseWrapper<>(detailList);
+        ReportItemInfo itemInfo = reportService.getReportDetailList(request);
+        return new ResponseWrapper<>(itemInfo);
+    }
+
+    @PostMapping("/download/{snNumber}")
+    public void download(@PathVariable("snNumber") String snNumber, HttpServletResponse response) throws IOException {
+        // 这里注意 有同学反应使用swagger 会导致各种问题，请直接用浏览器或者用postman
+        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        response.setCharacterEncoding("utf-8");
+        // 这里URLEncoder.encode可以防止中文乱码 当然和easyexcel没有关系
+        String fileName = URLEncoder.encode("测试", "UTF-8").replaceAll("\\+", "%20");
+        response.setHeader("Content-disposition", "attachment;filename*=utf-8''" + fileName + ".xlsx");
+        ReportDetail reportDetail = reportService.getReportDetail(snNumber);
+        String detailStr = reportDetail.getDetail();
+        List<ReportItem> reportItems = JSON.parseArray(detailStr, ReportItem.class);
+        EasyExcel.write(response.getOutputStream(), ReportItem.class).sheet("模板").doWrite(reportItems);
     }
 }

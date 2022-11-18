@@ -1,9 +1,6 @@
 package org.flowwork.service;
 
-import org.flowwork.controller.dto.PageDto;
-import org.flowwork.controller.dto.PageRequest;
-import org.flowwork.controller.dto.ReportDetailRequest;
-import org.flowwork.controller.dto.ReportDto;
+import org.flowwork.controller.dto.*;
 import org.flowwork.model.entity.Report;
 import org.flowwork.model.entity.ReportDetail;
 import org.flowwork.model.entity.ReportItem;
@@ -23,5 +20,5 @@ public interface ReportService {
 
     ReportDetail getReportDetail(String snNumber);
 
-    List<ReportItem> getReportDetailList(ReportDetailRequest request);
+    ReportItemInfo getReportDetailList(ReportDetailRequest request);
 }
