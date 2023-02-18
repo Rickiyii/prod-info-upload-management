@@ -24,7 +24,7 @@ report-patterns:
       devices:
         - itemGroups:
             - groupName: 中央处理器(CPU)
-              itemNames: 处理器名称, 制程步进, 原始频率, L2缓存, L3缓存
+              itemNames: 处理器名称, 制程步进, 原始频率, L2 缓存, L3 缓存
     - scope: SPD
       devices:
         - itemGroups:
